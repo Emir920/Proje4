@@ -10,6 +10,33 @@
             background: #9370DB;
             padding: 20px;
         }
+        .navbar {
+            background-color: #fff;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .navbar .auth-links {
+            display: flex;
+            gap: 10px;
+        }
+        .navbar .auth-links a,
+        .navbar .auth-links form button {
+            color: #333;
+            text-decoration: none;
+            padding: 5px 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+            cursor: pointer;
+        }
+        .navbar .auth-links a:hover,
+        .navbar .auth-links form button:hover {
+            background-color: #e0e0e0;
+        }
         .container {
             max-width: 600px;
             margin: auto;
@@ -53,17 +80,21 @@
     </style>
 </head>
 <body>
-    <h1>Message Board</h1>
-    {% if user.is_authenticated %}
-    <p>Welcome, {{ user.username }}!
-    <form method="post" action="{% url 'logout' %}" style="display: inline;">
-      {% csrf_token %}
-      <button type="submit" style="background: none; border: none; color: blue; text-decoration: underline; cursor: pointer;">Logout</button>
-    </form>
-    </p>
-    {% else %}
-    <p><a href="{% url 'login' %}">Log In</a> | <a href="{% url 'signup' %}">Sign Up</a></p>
-    {% endif %}
+    <nav class="navbar">
+        <h1>Message Board</h1>
+        <div class="auth-links">
+            {% if user.is_authenticated %}
+            <span>Welcome, {{ user.username }}!</span>
+            <form method="post" action="{% url 'logout' %}">
+              {% csrf_token %}
+              <button type="submit">Logout</button>
+            </form>
+            {% else %}
+            <a href="{% url 'login' %}">Log In</a>
+            <a href="{% url 'signup' %}">Sign Up</a>
+            {% endif %}
+        </div>
+    </nav>
     {% block content %}{% endblock %}
 </body>
 </html>
