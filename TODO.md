@@ -1,0 +1,3 @@
+- [x] Fix reaction button URLs in message_list.html
+- [x] Change body background color to cool purple in base.html
+- [x] Skip testing as per user request

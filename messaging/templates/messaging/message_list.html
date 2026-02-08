@@ -1,0 +1,72 @@
+{% extends 'messaging/base.html' %}
+{% load messaging_tags %}
+
+{% block content %}
+<div class="container">
+  <h2>Message Wall</h2>
+  <p>Welcome, {{ user.username }}!
+  <form method="post" action="{% url 'logout' %}" style="display: inline;">
+    {% csrf_token %}
+    <button type="submit" style="background: none; border: none; color: blue; text-decoration: underline; cursor: pointer;">Logout</button>
+  </form>
+  </p>
+
+  <form id="messageForm" method="post">
+    {% csrf_token %}
+    <textarea id="messageInput" name="text" placeholder="Write a message..."></textarea>
+    <button type="submit">Post</button>
+  </form>
+
+  <div id="messages">
+    {% for message in messages %}
+    <div class="message" data-id="{{ message.id }}">
+        <p><strong>{{ message.author.username }}</strong></p>
+        <p>{{ message.timestamp }}</p>
+        <p>{{ message.text }}
+        {% if message.author == user %}
+        <a href="{% url 'delete_message' message.id %}">Delete</a>
+        {% endif %}
+        </p>
+        <div class="reactions">
+            <span onclick="react(this, 'like')" data-type="like" class="{% if user_reactions|get:message.id == 'like' %}reacted{% endif %}">❤️ <small>{{ message.like_count }}</small></span>
+            <span onclick="react(this, 'laugh')" data-type="laugh" class="{% if user_reactions|get:message.id == 'laugh' %}reacted{% endif %}">😂 <small>{{ message.laugh_count }}</small></span>
+            <span onclick="react(this, 'sad')" data-type="sad" class="{% if user_reactions|get:message.id == 'sad' %}reacted{% endif %}">😢 <small>{{ message.sad_count }}</small></span>
+            <span onclick="react(this, 'fire')" data-type="fire" class="{% if user_reactions|get:message.id == 'fire' %}reacted{% endif %}">🔥 <small>{{ message.fire_count }}</small></span>
+        </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<script>
+  document.getElementById('messageForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+    fetch('{% url "add_message" %}', {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+      }
+    }).then(response => {
+      if (response.ok) {
+        location.reload();
+      }
+    });
+  });
+
+  function react(element, reactionType) {
+    const messageDiv = element.closest('.message');
+    const messageId = messageDiv.dataset.id;
+    fetch(`/react/${messageId}/${reactionType}/`, {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+        'Content-Type': 'application/json'
+      }
+    }).then(response => response.json()).then(data => {
+      element.querySelector('small').textContent = data.count;
+    });
+  }
+</script>
+{% endblock %}

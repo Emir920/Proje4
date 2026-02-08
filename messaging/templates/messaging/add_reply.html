@@ -1,0 +1,15 @@
+{% extends 'messaging/base.html' %}
+
+{% block content %}
+<h2>Reply to Message</h2>
+<div class="message">
+    <strong>{{ message.author }}</strong> ({{ message.timestamp }}):<br>
+    {{ message.text }}
+</div>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Add Reply</button>
+</form>
+<a href="{% url 'message_list' %}">Back to Messages</a>
+{% endblock %}
