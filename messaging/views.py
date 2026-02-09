@@ -3,18 +3,36 @@ from django.http import JsonResponse
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.core.paginator import Paginator
+from django.db.models import Q
 from .models import Message, Reaction
 from .forms import MessageForm, ReplyForm, SignUpForm
 
 @login_required
 def message_list(request):
-    messages = Message.objects.all().order_by('-timestamp')
+    query = request.GET.get('q', '')
+    messages_list = Message.objects.all().order_by('-timestamp')
+
+    if query:
+        messages_list = messages_list.filter(
+            Q(text__icontains=query) | Q(author__username__icontains=query)
+        )
+
+    paginator = Paginator(messages_list, 10)  # Show 10 messages per page
+    page_number = request.GET.get('page')
+    messages = paginator.get_page(page_number)
+
     user_reactions = {}
     for message in messages:
         reaction = Reaction.objects.filter(user=request.user, message=message).first()
         if reaction:
             user_reactions[message.id] = reaction.reaction_type
-    return render(request, 'messaging/message_list.html', {'messages': messages, 'user_reactions': user_reactions})
+
+    return render(request, 'messaging/message_list.html', {
+        'messages': messages,
+        'user_reactions': user_reactions,
+        'query': query
+    })
 
 @login_required
 def add_message(request):
@@ -24,6 +42,7 @@ def add_message(request):
             message = form.save(commit=False)
             message.author = request.user
             message.save()
+            messages.success(request, 'Your message has been posted successfully!')
             return redirect('message_list')
     else:
         form = MessageForm()
@@ -46,6 +65,10 @@ def add_reply(request, message_id):
 
 @login_required
 def react(request, message_id, reaction_type):
+    valid_reactions = ['like', 'laugh', 'sad', 'fire', 'thumbs_up', 'angry']
+    if reaction_type not in valid_reactions:
+        return JsonResponse({'error': 'Invalid reaction type'}, status=400)
+
     if request.method == 'POST':
         message = get_object_or_404(Message, id=message_id)
         existing_reaction = Reaction.objects.filter(user=request.user, message=message).first()
@@ -88,6 +111,19 @@ def signup(request):
     else:
         form = SignUpForm()
     return render(request, 'messaging/signup.html', {'form': form})
+
+@login_required
+def profile(request):
+    user_messages = Message.objects.filter(author=request.user).order_by('-timestamp')
+    total_messages = user_messages.count()
+    total_reactions = sum(message.like_count + message.laugh_count + message.sad_count + message.fire_count for message in user_messages)
+
+    context = {
+        'user_messages': user_messages,
+        'total_messages': total_messages,
+        'total_reactions': total_reactions,
+    }
+    return render(request, 'messaging/profile.html', context)
 
 def login_view(request):
     if request.method == 'POST':

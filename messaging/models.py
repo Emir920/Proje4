@@ -9,6 +9,8 @@ class Message(models.Model):
     laugh_count = models.IntegerField(default=0)
     sad_count = models.IntegerField(default=0)
     fire_count = models.IntegerField(default=0)
+    thumbs_up_count = models.IntegerField(default=0)
+    angry_count = models.IntegerField(default=0)
 
     def __str__(self):
         return f"{self.author.username}: {self.text[:50]}"

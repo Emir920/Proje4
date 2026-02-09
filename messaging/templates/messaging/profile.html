@@ -1,0 +1,87 @@
+{% extends 'messaging/base.html' %}
+
+{% block title %}Profile - {{ user.username }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <h2 class="mb-4"><i class="fas fa-user"></i> Profile: {{ user.username }}</h2>
+
+      <!-- Profile Stats -->
+      <div class="row mb-4">
+        <div class="col-md-4">
+          <div class="card text-center">
+            <div class="card-body">
+              <h5 class="card-title">{{ total_messages }}</h5>
+              <p class="card-text">Total Messages</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card text-center">
+            <div class="card-body">
+              <h5 class="card-title">{{ total_reactions }}</h5>
+              <p class="card-text">Total Reactions</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card text-center">
+            <div class="card-body">
+              <h5 class="card-title">{{ user.date_joined|date:"M d, Y" }}</h5>
+              <p class="card-text">Member Since</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- User's Messages -->
+      <h3 class="mb-3">Your Messages</h3>
+      {% if user_messages %}
+        {% for message in user_messages %}
+        <div class="card mb-3">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <h6 class="card-title mb-1">
+                  <small class="text-muted">{{ message.timestamp|date:"M d, Y H:i" }}</small>
+                </h6>
+              </div>
+              <a href="{% url 'delete_message' message.id %}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to delete this message?')">
+                <i class="fas fa-trash"></i>
+              </a>
+            </div>
+            <p class="card-text">{{ message.text }}</p>
+            <div class="reactions">
+              <span class="me-3">
+                <i class="fas fa-heart text-primary"></i> <small>{{ message.like_count }}</small>
+              </span>
+              <span class="me-3">
+                <i class="fas fa-laugh text-warning"></i> <small>{{ message.laugh_count }}</small>
+              </span>
+              <span class="me-3">
+                <i class="fas fa-sad-tear text-info"></i> <small>{{ message.sad_count }}</small>
+              </span>
+              <span class="me-3">
+                <i class="fas fa-fire text-danger"></i> <small>{{ message.fire_count }}</small>
+              </span>
+              <span class="me-3">
+                <i class="fas fa-thumbs-up text-success"></i> <small>{{ message.thumbs_up_count }}</small>
+              </span>
+              <span class="me-3">
+                <i class="fas fa-angry text-danger"></i> <small>{{ message.angry_count }}</small>
+              </span>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="alert alert-info">
+          <i class="fas fa-info-circle"></i> You haven't posted any messages yet.
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
