@@ -1,52 +1,5 @@
 {% extends 'messaging/base.html' %}
 
-<<<<<<< HEAD
-{% block title %}{{ user_profile.username }}'s Profile{% endblock %}
-
-{% block content %}
-<div class="container">
-    <div class="profile-header">
-        <h2>{{ user_profile.username }}'s Profile</h2>
-        <p>Member since: {{ user_profile.date_joined|date:"F d, Y" }}</p>
-        
-        <div class="profile-stats">
-            <p><strong>Messages:</strong> {{ message_count }}</p>
-            <p><strong>Total Reactions:</strong> {{ total_reactions }}</p>
-        </div>
-    </div>
-    
-    <h3>Messages by {{ user_profile.username }}</h3>
-    
-    {% if user_messages %}
-        {% for message in user_messages %}
-            <div class="message">
-                <p><strong>{{ message.author.username }}</strong> <small>{{ message.timestamp|date:"F d, Y, g:i a" }}</small></p>
-                <p>{{ message.content }}</p>
-                
-                <div class="reactions">
-                    <span>🔥 {{ message.fire_count }}</span>
-                    <span>😂 {{ message.laugh_count }}</span>
-                    <span>❤️ {{ message.heart_count }}</span>
-                    <span>😮 {{ message.wow_count }}</span>
-                </div>
-                
-                {% if message.replies.all %}
-                    <div class="replies">
-                        {% for reply in message.replies.all %}
-                            <div class="reply">
-                                <p><strong>{{ reply.author.username }}</strong>: {{ reply.content }}</p>
-                            </div>
-                        {% endfor %}
-                    </div>
-                {% endif %}
-            </div>
-        {% endfor %}
-    {% else %}
-        <p>No messages yet.</p>
-    {% endif %}
-    
-    <a href="{% url 'message_list' %}" class="btn btn-secondary">Back to Message List</a>
-=======
 {% block title %}Profile - {{ user.username }}{% endblock %}
 
 {% block content %}
@@ -130,6 +83,5 @@
       {% endif %}
     </div>
   </div>
->>>>>>> b05a010e226100904712dde554bf9a50b9a64667
 </div>
 {% endblock %}
