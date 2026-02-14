@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('messaging', '0004_reaction'),
+        ('messaging', '0005_message_angry_count_message_thumbs_up_count'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
