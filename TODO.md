@@ -1,6 +1,15 @@
-# TODO: Add Navbar and Move Auth Buttons
+# TODO: Add Unique Username Validation
 
-- [ ] Add a `<nav>` element to base.html for the navbar structure
-- [ ] Move the conditional Sign Up, Log In, and Log Out buttons into the navbar
-- [ ] Update CSS styles to properly style the navbar (background, layout, responsiveness)
-- [ ] Test the template rendering to ensure navbar displays correctly
+## Task
+Prevent users from registering with duplicate usernames by adding explicit form-level validation.
+
+## Plan:
+- [x] Read and understand the current project structure
+- [ ] Update SignUpForm in messaging/forms.py to add explicit unique username validation
+
+## Implementation Steps:
+1. Add a custom `clean_username` method to `SignUpForm` that checks if the username already exists
+2. Provide a user-friendly error message if the username is taken
+
+## Files to Edit:
+- messaging/forms.py

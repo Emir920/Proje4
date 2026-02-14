@@ -100,3 +100,28 @@ def login_view(request):
         else:
             messages.error(request, 'Invalid username or password.')
     return render(request, 'messaging/login.html')
+
+@login_required
+def profile(request, username):
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+    user_profile = get_object_or_404(User, username=username)
+    user_messages = Message.objects.filter(author=user_profile).order_by('-timestamp')
+    
+    # Calculate message count
+    message_count = user_messages.count()
+    
+    # Calculate total reactions on all messages
+    total_reactions = 0
+    for message in user_messages:
+        total_reactions += message.fire_count
+        total_reactions += message.laugh_count
+        total_reactions += message.like_count
+        total_reactions += message.sad_count
+    
+    return render(request, 'messaging/profile.html', {
+        'user_profile': user_profile, 
+        'user_messages': user_messages,
+        'message_count': message_count,
+        'total_reactions': total_reactions
+    })
