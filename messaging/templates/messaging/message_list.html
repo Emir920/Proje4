@@ -2,39 +2,99 @@
 {% load messaging_tags %}
 
 {% block content %}
-<div class="container">
-  <h2>Message Wall</h2>
-  <p>Welcome, {{ user.username }}!
-  <form method="post" action="{% url 'logout' %}" style="display: inline;">
-    {% csrf_token %}
-    <button type="submit" style="background: none; border: none; color: blue; text-decoration: underline; cursor: pointer;">Logout</button>
-  </form>
-  </p>
+<div class="container-fluid">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <h2 class="mb-4"><i class="fas fa-comments"></i> Message Wall</h2>
 
-  <form id="messageForm" method="post">
-    {% csrf_token %}
-    <textarea id="messageInput" name="text" placeholder="Write a message..."></textarea>
-    <button type="submit">Post</button>
-  </form>
-
-  <div id="messages">
-    {% for message in messages %}
-    <div class="message" data-id="{{ message.id }}">
-        <p><strong>{{ message.author.username }}</strong></p>
-        <p>{{ message.timestamp }}</p>
-        <p>{{ message.text }}
-        {% if message.author == user %}
-        <a href="{% url 'delete_message' message.id %}">Delete</a>
-        {% endif %}
-        </p>
-        <div class="reactions">
-            <span onclick="react(this, 'like')" data-type="like" class="{% if user_reactions|get:message.id == 'like' %}reacted{% endif %}">❤️ <small>{{ message.like_count }}</small></span>
-            <span onclick="react(this, 'laugh')" data-type="laugh" class="{% if user_reactions|get:message.id == 'laugh' %}reacted{% endif %}">😂 <small>{{ message.laugh_count }}</small></span>
-            <span onclick="react(this, 'sad')" data-type="sad" class="{% if user_reactions|get:message.id == 'sad' %}reacted{% endif %}">😢 <small>{{ message.sad_count }}</small></span>
-            <span onclick="react(this, 'fire')" data-type="fire" class="{% if user_reactions|get:message.id == 'fire' %}reacted{% endif %}">🔥 <small>{{ message.fire_count }}</small></span>
+      <!-- Search Form -->
+      <form method="get" class="mb-4">
+        <div class="input-group">
+          <input type="text" name="q" class="form-control" placeholder="Search messages..." value="{{ request.GET.q }}">
+          <button class="btn btn-outline-primary" type="submit"><i class="fas fa-search"></i> Search</button>
         </div>
+      </form>
+
+      <!-- New Message Form yupiie -->
+      <div class="card mb-4">
+        <div class="card-body">
+          <form id="messageForm" method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+              <textarea id="messageInput" name="text" class="form-control" rows="3" placeholder="Write a message..."></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> Post</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Messages -->
+      <div id="messages">
+        {% for message in messages %}
+        <div class="card mb-3 message" data-id="{{ message.id }}">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <h6 class="card-title mb-1">
+                  <i class="fas fa-user"></i> {{ message.author.username }}
+                  <small class="text-muted">{{ message.timestamp|date:"M d, Y H:i" }}</small>
+                </h6>
+              </div>
+              {% if message.author == user %}
+              <a href="{% url 'delete_message' message.id %}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to delete this message?')">
+                <i class="fas fa-trash"></i>
+              </a>
+              {% endif %}
+            </div>
+            <p class="card-text">{{ message.text }}</p>
+            <div class="reactions">
+              <span onclick="react(this, 'like')" data-type="like" class="me-3 {% if user_reactions|get:message.id == 'like' %}text-primary{% endif %}">
+                <i class="fas fa-heart"></i> <small>{{ message.like_count }}</small>
+              </span>
+              <span onclick="react(this, 'laugh')" data-type="laugh" class="me-3 {% if user_reactions|get:message.id == 'laugh' %}text-warning{% endif %}">
+                <i class="fas fa-laugh"></i> <small>{{ message.laugh_count }}</small>
+              </span>
+              <span onclick="react(this, 'sad')" data-type="sad" class="me-3 {% if user_reactions|get:message.id == 'sad' %}text-info{% endif %}">
+                <i class="fas fa-sad-tear"></i> <small>{{ message.sad_count }}</small>
+              </span>
+              <span onclick="react(this, 'fire')" data-type="fire" class="me-3 {% if user_reactions|get:message.id == 'fire' %}text-danger{% endif %}">
+                <i class="fas fa-fire"></i> <small>{{ message.fire_count }}</small>
+              </span>
+              <span onclick="react(this, 'thumbs_up')" data-type="thumbs_up" class="me-3 {% if user_reactions|get:message.id == 'thumbs_up' %}text-success{% endif %}">
+                <i class="fas fa-thumbs-up"></i> <small>{{ message.thumbs_up_count }}</small>
+              </span>
+              <span onclick="react(this, 'angry')" data-type="angry" class="me-3 {% if user_reactions|get:message.id == 'angry' %}text-danger{% endif %}">
+                <i class="fas fa-angry"></i> <small>{{ message.angry_count }}</small>
+              </span>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Pagination -->
+      {% if is_paginated %}
+      <nav aria-label="Message pagination">
+        <ul class="pagination justify-content-center">
+          {% if page_obj.has_previous %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">Previous</a>
+          </li>
+          {% endif %}
+          {% for num in page_obj.paginator.page_range %}
+          <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+            <a class="page-link" href="?page={{ num }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">{{ num }}</a>
+          </li>
+          {% endfor %}
+          {% if page_obj.has_next %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">Next</a>
+          </li>
+          {% endif %}
+        </ul>
+      </nav>
+      {% endif %}
     </div>
-    {% endfor %}
   </div>
 </div>
 
