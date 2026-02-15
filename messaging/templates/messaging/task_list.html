@@ -1,29 +1,42 @@
 {% extends 'messaging/base.html' %}
 
-{% block title %}Görevler - Message Board{% endblock %}
+{% block title %}Tasks - Message Board{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <div class="row mb-4">
+<div class="container-lg">
+    <!-- Header Section -->
+    <div class="row mb-5">
         <div class="col-md-8">
-            <h1><i class="fas fa-tasks"></i> Görevler</h1>
+            <h1 class="display-6 mb-2">
+                <i class="fas fa-tasks" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;"></i>
+                My Tasks
+            </h1>
+            <p class="text-muted">Organize and track your daily tasks</p>
         </div>
-        <div class="col-md-4 text-end">
-            <a href="{% url 'add_task' %}" class="btn btn-primary">
-                <i class="fas fa-plus"></i> Yeni Görev Ekle
+        <div class="col-md-4 d-flex justify-content-md-end align-items-start">
+            <a href="{% url 'add_task' %}" class="btn btn-primary btn-lg">
+                <i class="fas fa-plus-circle"></i> New Task
             </a>
         </div>
     </div>
 
-    <!-- Status Filter -->
+    <!-- Status Filter with Better Styling -->
     <div class="card mb-4">
         <div class="card-body">
-            <div class="btn-group" role="group">
-                <a href="{% url 'task_list' %}" class="btn btn-outline-secondary {% if not status_filter %}active{% endif %}">
-                    Tümü
+            <h6 class="card-title mb-3"><i class="fas fa-filter"></i> Filter by Status</h6>
+            <div class="btn-group flex-wrap" role="group">
+                <a href="{% url 'task_list' %}" class="btn btn-sm btn-outline-primary {% if not status_filter %}active{% endif %}">
+                    <i class="fas fa-list"></i> All
                 </a>
                 {% for status_value, status_label in status_choices %}
-                <a href="?status={{ status_value }}" class="btn btn-outline-secondary {% if status_filter == status_value %}active{% endif %}">
+                <a href="?status={{ status_value }}" class="btn btn-sm btn-outline-primary {% if status_filter == status_value %}active{% endif %}">
+                    {% if status_value == 'completed' %}
+                        <i class="fas fa-check-circle"></i>
+                    {% elif status_value == 'in_progress' %}
+                        <i class="fas fa-spinner"></i>
+                    {% else %}
+                        <i class="fas fa-clock"></i>
+                    {% endif %}
                     {{ status_label }}
                 </a>
                 {% endfor %}
@@ -31,77 +44,174 @@
         </div>
     </div>
 
-    <!-- Messages -->
+    <!-- Success Messages -->
     {% if messages %}
     <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle me-2"></i>
         {% for message in messages %}
-            {{ message }}
+            <strong>Success!</strong> {{ message }}
         {% endfor %}
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
     {% endif %}
 
-    <!-- Tasks List -->
+    <!-- Task Stats -->
     {% if tasks %}
-        {% for task in tasks %}
-        <div class="card mb-3">
-            <div class="card-body">
-                <div class="row align-items-center">
-                    <div class="col-md-8">
-                        <h5 class="card-title">
-                            {% if task.status == 'completed' %}
-                                <strike>{{ task.title }}</strike>
-                            {% else %}
-                                {{ task.title }}
-                            {% endif %}
-                        </h5>
-                        {% if task.description %}
-                        <p class="card-text text-muted">{{ task.description }}</p>
-                        {% endif %}
-                        <small class="text-muted">
-                            <i class="fas fa-calendar"></i> Oluşturulma: {{ task.created_at|date:"d.m.Y H:i" }}
-                            {% if task.completed_at %}
-                            | <i class="fas fa-check-circle"></i> Tamamlanma: {{ task.completed_at|date:"d.m.Y H:i" }}
-                            {% endif %}
-                        </small>
-                    </div>
-                    <div class="col-md-4 text-end">
-                        <div class="mb-2">
-                            <span class="badge {% if task.status == 'completed' %}bg-success{% elif task.status == 'in_progress' %}bg-warning{% else %}bg-secondary{% endif %}">
-                                {{ task.get_status_display }}
-                            </span>
-                        </div>
-                        <div class="btn-group btn-group-sm" role="group">
-                            <a href="{% url 'edit_task' task.id %}" class="btn btn-outline-primary" title="Düzenle">
-                                <i class="fas fa-edit"></i>
-                            </a>
-                            <a href="{% url 'delete_task' task.id %}" class="btn btn-outline-danger" title="Sil" onclick="return confirm('Bu görevi silmek istediğinizden emin misiniz?');">
-                                <i class="fas fa-trash"></i>
-                            </a>
-                        </div>
-                    </div>
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="text-primary mb-0">{{ tasks|length }}</h3>
+                    <p class="text-muted mb-0">Total Tasks</p>
                 </div>
-                {% if task.status != 'completed' %}
-                <div class="mt-3">
-                    <form method="post" action="{% url 'update_task_status' task.id %}" class="d-inline">
-                        {% csrf_token %}
-                        <select name="status" class="form-select form-select-sm d-inline-block w-auto" onchange="this.form.submit();">
-                            {% for status_value, status_label in status_choices %}
-                                <option value="{{ status_value }}" {% if task.status == status_value %}selected{% endif %}>
-                                    {{ status_label }}
-                                </option>
-                            {% endfor %}
-                        </select>
-                    </form>
-                </div>
-                {% endif %}
             </div>
         </div>
-        {% endfor %}
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="text-success mb-0">{% load django_filters %}{{ tasks|dictsort:"status" }}</h3>
+                    <p class="text-muted mb-0">Pending</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Tasks List -->
+    {% if tasks %}
+        <div class="tasks-container">
+            {% for task in tasks %}
+            <div class="card mb-3 task-card" data-status="{{ task.status }}">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-7">
+                            <!-- Status Indicator -->
+                            <div class="d-flex align-items-start gap-3">
+                                <div class="task-status-indicator">
+                                    {% if task.status == 'completed' %}
+                                        <i class="fas fa-check-circle text-success"></i>
+                                    {% elif task.status == 'in_progress' %}
+                                        <i class="fas fa-circle-notch text-warning fa-spin"></i>
+                                    {% else %}
+                                        <i class="fas fa-circle text-secondary"></i>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <h5 class="card-title {% if task.status == 'completed' %}text-decoration-line-through text-muted{% endif %}">
+                                        {{ task.title }}
+                                    </h5>
+                                    {% if task.description %}
+                                    <p class="card-text text-muted small mb-2">{{ task.description }}</p>
+                                    {% endif %}
+                                    <small class="text-muted">
+                                        <i class="fas fa-calendar-alt"></i> Created: {{ task.created_at|date:"M d, Y" }}
+                                        {% if task.completed_at %}
+                                        <br><i class="fas fa-check-double"></i> Completed: {{ task.completed_at|date:"M d, Y" }}
+                                        {% endif %}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-5 d-flex justify-content-end gap-2 align-items-center">
+                            <!-- Status Badge -->
+                            <span class="badge {% if task.status == 'completed' %}bg-success{% elif task.status == 'in_progress' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
+                                {{ task.get_status_display }}
+                            </span>
+                            
+                            <!-- Action Buttons -->
+                            <div class="btn-group btn-group-sm" role="group">
+                                <a href="{% url 'edit_task' task.id %}" class="btn btn-outline-primary" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{% url 'delete_task' task.id %}" class="btn btn-outline-danger" title="Delete" onclick="return confirm('Are you sure?');">
+                                    <i class="fas fa-trash-alt"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Status Change Form -->
+                    {% if task.status != 'completed' %}
+                    <div class="mt-3 pt-3 border-top">
+                        <form method="post" action="{% url 'update_task_status' task.id %}" class="d-flex gap-2 align-items-center">
+                            {% csrf_token %}
+                            <small class="text-muted">Update status:</small>
+                            <select name="status" class="form-select form-select-sm d-inline-block w-auto" onchange="this.form.submit();">
+                                {% for status_value, status_label in status_choices %}
+                                    <option value="{{ status_value }}" {% if task.status == status_value %}selected{% endif %}>
+                                        {{ status_label }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </form>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
     {% else %}
-    <div class="alert alert-info">
-        <i class="fas fa-info-circle"></i> Henüz görev yok. <a href="{% url 'add_task' %}">İlk görevini oluştur</a>
+    <div class="alert alert-info text-center py-5">
+        <i class="fas fa-inbox" style="font-size: 3rem; opacity: 0.5;"></i>
+        <h4 class="mt-3">No tasks yet</h4>
+        <p class="text-muted mb-0">Get started by creating your first task</p>
+        <a href="{% url 'add_task' %}" class="btn btn-primary mt-3">
+            <i class="fas fa-plus"></i> Create Task
+        </a>
     </div>
     {% endif %}
 </div>
+
+<style>
+    .task-card {
+        transition: all 0.3s ease;
+    }
+
+    .task-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+    }
+
+    .task-card[data-status="completed"] {
+        opacity: 0.85;
+    }
+
+    .task-status-indicator {
+        font-size: 1.5rem;
+        min-width: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    @keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    .fa-spin {
+        animation: spin 2s linear infinite;
+    }
+
+    .tasks-container {
+        animation: fadeIn 0.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
+    .btn-group .btn-outline-primary:hover {
+        background: var(--primary-gradient);
+        border-color: #667eea;
+        color: white;
+    }
+</style>
 {% endblock %}
