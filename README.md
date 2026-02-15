@@ -35,6 +35,8 @@ A modern, responsive Django-based message board application with user authentica
 ### Message Wall
 <img width="1914" height="951" alt="Message Wall" src="https://github.com/user-attachments/assets/a4fb248f-0687-470c-896a-24fa3ca33c27" />
 
+ bunlar eski foto güncel fotolar gelmiyecektir
+ 
 ## Installation
 
 1. **Clone the repository:**
