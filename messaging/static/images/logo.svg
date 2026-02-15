@@ -1,0 +1,16 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="200" height="200" fill="#1abc9c" rx="20"/>
+  
+  <!-- Left speech bubble (blue/purple) -->
+  <ellipse cx="70" cy="80" rx="45" ry="50" fill="#667eea"/>
+  
+  <!-- Right speech bubble (pink/purple) -->
+  <ellipse cx="130" cy="110" rx="40" ry="45" fill="#764ba2"/>
+  
+  <!-- Tail for left bubble -->
+  <polygon points="40,120 20,140 35,125" fill="#667eea"/>
+  
+  <!-- Tail for right bubble -->
+  <polygon points="160,140 180,150 170,130" fill="#764ba2"/>
+</svg>
