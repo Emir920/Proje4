@@ -69,7 +69,7 @@
         <div class="col-md-3">
             <div class="card text-center">
                 <div class="card-body">
-                    <h3 class="text-success mb-0">{% load django_filters %}{{ tasks|dictsort:"status" }}</h3>
+                    <h3 class="text-success mb-0">{{ tasks|length }}</h3>
                     <p class="text-muted mb-0">Pending</p>
                 </div>
             </div>

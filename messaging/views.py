@@ -117,7 +117,7 @@ def signup(request):
 def profile(request):
     user_messages = Message.objects.filter(author=request.user).order_by('-timestamp')
     total_messages = user_messages.count()
-    total_reactions = sum(message.like_count + message.laugh_count + message.sad_count + message.fire_count for message in user_messages)
+    total_reactions = sum(message.like_count + message.laugh_count + message.sad_count + message.fire_count + message.thumbs_up_count + message.angry_count for message in user_messages)
 
     context = {
         'user_messages': user_messages,
@@ -155,6 +155,8 @@ def profile(request, username):
         total_reactions += message.laugh_count
         total_reactions += message.like_count
         total_reactions += message.sad_count
+        total_reactions += message.thumbs_up_count
+        total_reactions += message.angry_count
     
     return render(request, 'messaging/profile.html', {
         'user_profile': user_profile, 

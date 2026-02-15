@@ -177,6 +177,17 @@
 </style>
 
 <script>
+  let lastMessageId = null;
+  let isAutoRefreshEnabled = true;
+  
+  // Get the latest message ID on page load
+  function initializeLastMessageId() {
+    const messages = document.querySelectorAll('.message');
+    if (messages.length > 0) {
+      lastMessageId = parseInt(messages[0].dataset.id);
+    }
+  }
+
   // Character counter
   const messageInput = document.getElementById('messageInput');
   const charCount = document.getElementById('charCount');
@@ -189,6 +200,7 @@
     }
   });
 
+  // Post new message without page reload
   document.getElementById('messageForm').addEventListener('submit', function(e) {
     e.preventDefault();
     const formData = new FormData(this);
@@ -200,11 +212,90 @@
       }
     }).then(response => {
       if (response.ok) {
-        location.reload();
+        messageInput.value = '';
+        charCount.textContent = '0';
+        // Immediately fetch new messages
+        fetchNewMessages();
       }
     });
   });
 
+  // Fetch new messages from server
+  function fetchNewMessages() {
+    const searchQuery = new URLSearchParams(window.location.search).get('q') || '';
+    const url = new URL('{% url "message_list" %}', window.location.origin);
+    if (searchQuery) {
+      url.searchParams.set('q', searchQuery);
+    }
+    
+    fetch(url.toString())
+      .then(response => response.text())
+      .then(html => {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const newMessages = doc.querySelectorAll('.message');
+        const currentMessages = document.querySelectorAll('.message');
+        
+        // Add new messages that aren't already on the page
+        newMessages.forEach(newMsg => {
+          const newId = parseInt(newMsg.dataset.id);
+          const exists = Array.from(currentMessages).some(m => parseInt(m.dataset.id) === newId);
+          
+          if (!exists) {
+            const messagesContainer = document.getElementById('messages');
+            newMsg.style.opacity = '0';
+            newMsg.style.transform = 'translateY(20px)';
+            messagesContainer.insertBefore(newMsg, messagesContainer.firstChild);
+            
+            // Trigger animation
+            setTimeout(() => {
+              newMsg.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+              newMsg.style.opacity = '1';
+              newMsg.style.transform = 'translateY(0)';
+            }, 10);
+            
+            // Update message count
+            const badge = document.querySelector('.badge');
+            if (badge) {
+              const count = parseInt(badge.textContent) + 1;
+              badge.innerHTML = '<i class="fas fa-envelope"></i> ' + count + ' messages';
+            }
+            
+            // Reattach event listeners for delete and reactions
+            attachMessageListeners(newMsg);
+          }
+        });
+        
+        // Update last message ID
+        if (newMessages.length > 0) {
+          lastMessageId = parseInt(newMessages[0].dataset.id);
+        }
+      })
+      .catch(error => console.error('Error fetching messages:', error));
+  }
+
+  // Attach event listeners to message elements
+  function attachMessageListeners(messageElement) {
+    // Attach reaction listeners
+    const reactions = messageElement.querySelectorAll('.reaction-button');
+    reactions.forEach(reaction => {
+      reaction.addEventListener('click', function() {
+        const reactionType = this.dataset.type;
+        react(this, reactionType);
+      });
+    });
+  }
+
+  // Auto-refresh messages every 3 seconds
+  function startAutoRefresh() {
+    setInterval(() => {
+      if (isAutoRefreshEnabled) {
+        fetchNewMessages();
+      }
+    }, 3000);
+  }
+
+  // React to messages
   function react(element, reactionType) {
     const messageDiv = element.closest('.message');
     const messageId = messageDiv.dataset.id;
@@ -219,5 +310,16 @@
       element.classList.toggle('active');
     });
   }
+
+  // Initialize on page load
+  document.addEventListener('DOMContentLoaded', function() {
+    initializeLastMessageId();
+    startAutoRefresh();
+    
+    // Attach listeners to existing messages
+    document.querySelectorAll('.message').forEach(msg => {
+      attachMessageListeners(msg);
+    });
+  });
 </script>
 {% endblock %}
