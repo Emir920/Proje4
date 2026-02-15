@@ -1,0 +1,107 @@
+{% extends 'messaging/base.html' %}
+
+{% block title %}Görevler - Message Board{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1><i class="fas fa-tasks"></i> Görevler</h1>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{% url 'add_task' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Yeni Görev Ekle
+            </a>
+        </div>
+    </div>
+
+    <!-- Status Filter -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="btn-group" role="group">
+                <a href="{% url 'task_list' %}" class="btn btn-outline-secondary {% if not status_filter %}active{% endif %}">
+                    Tümü
+                </a>
+                {% for status_value, status_label in status_choices %}
+                <a href="?status={{ status_value }}" class="btn btn-outline-secondary {% if status_filter == status_value %}active{% endif %}">
+                    {{ status_label }}
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Messages -->
+    {% if messages %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        {% for message in messages %}
+            {{ message }}
+        {% endfor %}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endif %}
+
+    <!-- Tasks List -->
+    {% if tasks %}
+        {% for task in tasks %}
+        <div class="card mb-3">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h5 class="card-title">
+                            {% if task.status == 'completed' %}
+                                <strike>{{ task.title }}</strike>
+                            {% else %}
+                                {{ task.title }}
+                            {% endif %}
+                        </h5>
+                        {% if task.description %}
+                        <p class="card-text text-muted">{{ task.description }}</p>
+                        {% endif %}
+                        <small class="text-muted">
+                            <i class="fas fa-calendar"></i> Oluşturulma: {{ task.created_at|date:"d.m.Y H:i" }}
+                            {% if task.completed_at %}
+                            | <i class="fas fa-check-circle"></i> Tamamlanma: {{ task.completed_at|date:"d.m.Y H:i" }}
+                            {% endif %}
+                        </small>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <div class="mb-2">
+                            <span class="badge {% if task.status == 'completed' %}bg-success{% elif task.status == 'in_progress' %}bg-warning{% else %}bg-secondary{% endif %}">
+                                {{ task.get_status_display }}
+                            </span>
+                        </div>
+                        <div class="btn-group btn-group-sm" role="group">
+                            <a href="{% url 'edit_task' task.id %}" class="btn btn-outline-primary" title="Düzenle">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="{% url 'delete_task' task.id %}" class="btn btn-outline-danger" title="Sil" onclick="return confirm('Bu görevi silmek istediğinizden emin misiniz?');">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% if task.status != 'completed' %}
+                <div class="mt-3">
+                    <form method="post" action="{% url 'update_task_status' task.id %}" class="d-inline">
+                        {% csrf_token %}
+                        <select name="status" class="form-select form-select-sm d-inline-block w-auto" onchange="this.form.submit();">
+                            {% for status_value, status_label in status_choices %}
+                                <option value="{{ status_value }}" {% if task.status == status_value %}selected{% endif %}>
+                                    {{ status_label }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle"></i> Henüz görev yok. <a href="{% url 'add_task' %}">İlk görevini oluştur</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

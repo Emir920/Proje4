@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from .models import Message, Reply
+from .models import Message, Reply, Task
 
 class MessageForm(forms.ModelForm):
     text = forms.CharField(
@@ -49,3 +49,31 @@ class SignUpForm(UserCreationForm):
         if User.objects.filter(username__iexact=username).exists():
             raise forms.ValidationError('This username is already taken. Please choose a different username.')
         return username
+
+
+class TaskForm(forms.ModelForm):
+    title = forms.CharField(
+        widget=forms.TextInput(attrs={'placeholder': 'Görev başlığı...', 'class': 'form-control'}),
+        max_length=200,
+        label='Başlık'
+    )
+    description = forms.CharField(
+        widget=forms.Textarea(attrs={'rows': 3, 'placeholder': 'Görev açıklaması...', 'class': 'form-control'}),
+        required=False,
+        label='Açıklama'
+    )
+    status = forms.ChoiceField(
+        choices=Task.STATUS_CHOICES,
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        label='Durum'
+    )
+
+    class Meta:
+        model = Task
+        fields = ['title', 'description', 'status']
+
+    def clean_title(self):
+        title = self.cleaned_data.get('title')
+        if len(title.strip()) < 1:
+            raise forms.ValidationError("Başlık boş olamaz.")
+        return title

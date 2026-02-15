@@ -5,8 +5,9 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.db.models import Q
-from .models import Message, Reaction
-from .forms import MessageForm, ReplyForm, SignUpForm
+from django.utils import timezone
+from .models import Message, Reaction, Task
+from .forms import MessageForm, ReplyForm, SignUpForm, TaskForm
 
 @login_required
 def message_list(request):
@@ -161,3 +162,72 @@ def profile(request, username):
         'message_count': message_count,
         'total_reactions': total_reactions
     })
+
+
+# Task Management Views
+@login_required
+def task_list(request):
+    status_filter = request.GET.get('status', '')
+    tasks = Task.objects.all().order_by('-created_at')
+    
+    if status_filter:
+        tasks = tasks.filter(status=status_filter)
+    
+    context = {
+        'tasks': tasks,
+        'status_filter': status_filter,
+        'status_choices': Task.STATUS_CHOICES
+    }
+    return render(request, 'messaging/task_list.html', context)
+
+
+@login_required
+def add_task(request):
+    if request.method == 'POST':
+        form = TaskForm(request.POST)
+        if form.is_valid():
+            task = form.save()
+            messages.success(request, f"'{task.title}' görev başarıyla oluşturuldu!")
+            return redirect('task_list')
+    else:
+        form = TaskForm()
+    return render(request, 'messaging/add_task.html', {'form': form})
+
+
+@login_required
+def edit_task(request, task_id):
+    task = get_object_or_404(Task, id=task_id)
+    if request.method == 'POST':
+        form = TaskForm(request.POST, instance=task)
+        if form.is_valid():
+            task = form.save()
+            messages.success(request, f"'{task.title}' görev başarıyla güncellendi!")
+            return redirect('task_list')
+    else:
+        form = TaskForm(instance=task)
+    return render(request, 'messaging/edit_task.html', {'form': form, 'task': task})
+
+
+@login_required
+def delete_task(request, task_id):
+    task = get_object_or_404(Task, id=task_id)
+    task_title = task.title
+    task.delete()
+    messages.success(request, f"'{task_title}' görev başarıyla silindi!")
+    return redirect('task_list')
+
+
+@login_required
+def update_task_status(request, task_id):
+    if request.method == 'POST':
+        task = get_object_or_404(Task, id=task_id)
+        new_status = request.POST.get('status')
+        
+        if new_status in dict(Task.STATUS_CHOICES):
+            task.status = new_status
+            if new_status == 'completed':
+                task.completed_at = timezone.now()
+            task.save()
+            return JsonResponse({'success': True, 'status': task.get_status_display()})
+    
+    return JsonResponse({'success': False}, status=400)
