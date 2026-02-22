@@ -4,28 +4,54 @@
 {% block content %}
 <div class="container-fluid">
   <div class="row justify-content-center">
-    <div class="col-md-8">
-      <h2 class="mb-4"><i class="fas fa-comments"></i> Message Wall</h2>
+    <div class="col-lg-8 col-md-10">
+      <!-- Header with Icon -->
+      <div class="mb-5">
+        <h1 class="display-6 mb-2">
+          <i class="fas fa-comments" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;"></i> 
+          Message Wall
+        </h1>
+        <p class="text-muted">Share your thoughts and connect with others</p>
+      </div>
 
       <!-- Search Form -->
-      <form method="get" class="mb-4">
-        <div class="input-group">
-          <input type="text" name="q" class="form-control" placeholder="Search messages..." value="{{ request.GET.q }}">
-          <button class="btn btn-outline-primary" type="submit"><i class="fas fa-search"></i> Search</button>
+      <form method="get" class="mb-5">
+        <div class="input-group input-group-lg">
+          <input type="text" name="q" class="form-control" placeholder="Search messages..." value="{{ request.GET.q }}" style="border-right: none;">
+          <button class="btn btn-outline-primary" type="submit">
+            <i class="fas fa-search"></i>
+          </button>
         </div>
       </form>
 
-      <!-- New Message Form yupiie -->
-      <div class="card mb-4">
+      <!-- New Message Form -->
+      <div class="card mb-5">
         <div class="card-body">
+          <h5 class="card-title mb-3">
+            <i class="fas fa-pen-fancy"></i> Write a Message
+          </h5>
           <form id="messageForm" method="post">
             {% csrf_token %}
             <div class="mb-3">
-              <textarea id="messageInput" name="text" class="form-control" rows="3" placeholder="Write a message..."></textarea>
+              <textarea id="messageInput" name="text" class="form-control" rows="4" placeholder="Share your thoughts..." style="resize: vertical;"></textarea>
             </div>
-            <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> Post</button>
+            <div class="d-flex justify-content-between align-items-center">
+              <small class="text-muted">
+                <span id="charCount">0</span> / 500 characters
+              </small>
+              <button type="submit" class="btn btn-primary btn-lg">
+                <i class="fas fa-paper-plane"></i> Post
+              </button>
+            </div>
           </form>
         </div>
+      </div>
+
+      <!-- Messages Count Badge -->
+      <div class="mb-3">
+        <span class="badge bg-primary" style="font-size: 0.95rem;">
+          <i class="fas fa-envelope"></i> {{ messages.count }} messages
+        </span>
       </div>
 
       <!-- Messages -->
@@ -33,38 +59,52 @@
         {% for message in messages %}
         <div class="card mb-3 message" data-id="{{ message.id }}">
           <div class="card-body">
-            <div class="d-flex justify-content-between align-items-start">
-              <div>
-                <h6 class="card-title mb-1">
-                  <i class="fas fa-user"></i> {{ message.author.username }}
-                  <small class="text-muted">{{ message.timestamp|date:"M d, Y H:i" }}</small>
-                </h6>
+            <div class="d-flex justify-content-between align-items-start mb-3">
+              <div class="d-flex align-items-center gap-2">
+                <div class="avatar rounded-circle bg-gradient p-2" style="width: 40px; height: 40px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white;">
+                  <i class="fas fa-user"></i>
+                </div>
+                <div>
+                  <h6 class="mb-0 fw-bold">{{ message.author.username }}</h6>
+                  <small class="text-muted">
+                    <i class="fas fa-clock"></i> {{ message.timestamp|date:"M d, Y H:i" }}
+                  </small>
+                </div>
               </div>
               {% if message.author == user %}
-              <a href="{% url 'delete_message' message.id %}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to delete this message?')">
-                <i class="fas fa-trash"></i>
+              <a href="{% url 'delete_message' message.id %}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure?')">
+                <i class="fas fa-trash-alt"></i>
               </a>
               {% endif %}
             </div>
-            <p class="card-text">{{ message.text }}</p>
-            <div class="reactions">
-              <span onclick="react(this, 'like')" data-type="like" class="me-3 {% if user_reactions|get:message.id == 'like' %}text-primary{% endif %}">
-                <i class="fas fa-heart"></i> <small>{{ message.like_count }}</small>
+            
+            <p class="card-text mb-3">{{ message.text }}</p>
+            
+            <!-- Reactions Bar -->
+            <div class="reactions border-top pt-3">
+              <span onclick="react(this, 'like')" data-type="like" class="reaction-button {% if user_reactions|get:message.id == 'like' %}active{% endif %}" title="Like">
+                <i class="fas fa-heart"></i> 
+                <small class="ms-1">{{ message.like_count }}</small>
               </span>
-              <span onclick="react(this, 'laugh')" data-type="laugh" class="me-3 {% if user_reactions|get:message.id == 'laugh' %}text-warning{% endif %}">
-                <i class="fas fa-laugh"></i> <small>{{ message.laugh_count }}</small>
+              <span onclick="react(this, 'laugh')" data-type="laugh" class="reaction-button {% if user_reactions|get:message.id == 'laugh' %}active{% endif %}" title="Laugh">
+                <i class="fas fa-laugh"></i> 
+                <small class="ms-1">{{ message.laugh_count }}</small>
               </span>
-              <span onclick="react(this, 'sad')" data-type="sad" class="me-3 {% if user_reactions|get:message.id == 'sad' %}text-info{% endif %}">
-                <i class="fas fa-sad-tear"></i> <small>{{ message.sad_count }}</small>
+              <span onclick="react(this, 'sad')" data-type="sad" class="reaction-button {% if user_reactions|get:message.id == 'sad' %}active{% endif %}" title="Sad">
+                <i class="fas fa-sad-tear"></i> 
+                <small class="ms-1">{{ message.sad_count }}</small>
               </span>
-              <span onclick="react(this, 'fire')" data-type="fire" class="me-3 {% if user_reactions|get:message.id == 'fire' %}text-danger{% endif %}">
-                <i class="fas fa-fire"></i> <small>{{ message.fire_count }}</small>
+              <span onclick="react(this, 'fire')" data-type="fire" class="reaction-button {% if user_reactions|get:message.id == 'fire' %}active{% endif %}" title="Fire">
+                <i class="fas fa-fire"></i> 
+                <small class="ms-1">{{ message.fire_count }}</small>
               </span>
-              <span onclick="react(this, 'thumbs_up')" data-type="thumbs_up" class="me-3 {% if user_reactions|get:message.id == 'thumbs_up' %}text-success{% endif %}">
-                <i class="fas fa-thumbs-up"></i> <small>{{ message.thumbs_up_count }}</small>
+              <span onclick="react(this, 'thumbs_up')" data-type="thumbs_up" class="reaction-button {% if user_reactions|get:message.id == 'thumbs_up' %}active{% endif %}" title="Thumbs Up">
+                <i class="fas fa-thumbs-up"></i> 
+                <small class="ms-1">{{ message.thumbs_up_count }}</small>
               </span>
-              <span onclick="react(this, 'angry')" data-type="angry" class="me-3 {% if user_reactions|get:message.id == 'angry' %}text-danger{% endif %}">
-                <i class="fas fa-angry"></i> <small>{{ message.angry_count }}</small>
+              <span onclick="react(this, 'angry')" data-type="angry" class="reaction-button {% if user_reactions|get:message.id == 'angry' %}active{% endif %}" title="Angry">
+                <i class="fas fa-angry"></i> 
+                <small class="ms-1">{{ message.angry_count }}</small>
               </span>
             </div>
           </div>
@@ -74,21 +114,27 @@
 
       <!-- Pagination -->
       {% if is_paginated %}
-      <nav aria-label="Message pagination">
-        <ul class="pagination justify-content-center">
+      <nav aria-label="Message pagination" class="mt-4">
+        <ul class="pagination pagination-lg justify-content-center">
           {% if page_obj.has_previous %}
           <li class="page-item">
-            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">Previous</a>
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" aria-label="Previous">
+              <i class="fas fa-chevron-left"></i> Previous
+            </a>
           </li>
           {% endif %}
+          
           {% for num in page_obj.paginator.page_range %}
           <li class="page-item {% if page_obj.number == num %}active{% endif %}">
             <a class="page-link" href="?page={{ num }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">{{ num }}</a>
           </li>
           {% endfor %}
+          
           {% if page_obj.has_next %}
           <li class="page-item">
-            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">Next</a>
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" aria-label="Next">
+              Next <i class="fas fa-chevron-right"></i>
+            </a>
           </li>
           {% endif %}
         </ul>
@@ -98,7 +144,63 @@
   </div>
 </div>
 
+<style>
+  .reaction-button {
+    cursor: pointer;
+    padding: 6px 10px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.2s ease;
+    background-color: transparent;
+    color: #666;
+    margin-right: 8px;
+  }
+
+  .reaction-button:hover {
+    background-color: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+    transform: translateY(-2px);
+  }
+
+  .reaction-button.active {
+    background-color: rgba(102, 126, 234, 0.2);
+    color: #667eea;
+    font-weight: 600;
+  }
+
+  #charCount {
+    font-weight: 600;
+    color: #667eea;
+  }
+</style>
+
 <script>
+  let lastMessageId = null;
+  let isAutoRefreshEnabled = true;
+  
+  // Get the latest message ID on page load
+  function initializeLastMessageId() {
+    const messages = document.querySelectorAll('.message');
+    if (messages.length > 0) {
+      lastMessageId = parseInt(messages[0].dataset.id);
+    }
+  }
+
+  // Character counter
+  const messageInput = document.getElementById('messageInput');
+  const charCount = document.getElementById('charCount');
+  
+  messageInput.addEventListener('input', function() {
+    charCount.textContent = this.value.length;
+    if (this.value.length > 500) {
+      this.value = this.value.substring(0, 500);
+      charCount.textContent = '500';
+    }
+  });
+
+  // Post new message without page reload
   document.getElementById('messageForm').addEventListener('submit', function(e) {
     e.preventDefault();
     const formData = new FormData(this);
@@ -110,11 +212,90 @@
       }
     }).then(response => {
       if (response.ok) {
-        location.reload();
+        messageInput.value = '';
+        charCount.textContent = '0';
+        // Immediately fetch new messages
+        fetchNewMessages();
       }
     });
   });
 
+  // Fetch new messages from server
+  function fetchNewMessages() {
+    const searchQuery = new URLSearchParams(window.location.search).get('q') || '';
+    const url = new URL('{% url "message_list" %}', window.location.origin);
+    if (searchQuery) {
+      url.searchParams.set('q', searchQuery);
+    }
+    
+    fetch(url.toString())
+      .then(response => response.text())
+      .then(html => {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const newMessages = doc.querySelectorAll('.message');
+        const currentMessages = document.querySelectorAll('.message');
+        
+        // Add new messages that aren't already on the page
+        newMessages.forEach(newMsg => {
+          const newId = parseInt(newMsg.dataset.id);
+          const exists = Array.from(currentMessages).some(m => parseInt(m.dataset.id) === newId);
+          
+          if (!exists) {
+            const messagesContainer = document.getElementById('messages');
+            newMsg.style.opacity = '0';
+            newMsg.style.transform = 'translateY(20px)';
+            messagesContainer.insertBefore(newMsg, messagesContainer.firstChild);
+            
+            // Trigger animation
+            setTimeout(() => {
+              newMsg.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+              newMsg.style.opacity = '1';
+              newMsg.style.transform = 'translateY(0)';
+            }, 10);
+            
+            // Update message count
+            const badge = document.querySelector('.badge');
+            if (badge) {
+              const count = parseInt(badge.textContent) + 1;
+              badge.innerHTML = '<i class="fas fa-envelope"></i> ' + count + ' messages';
+            }
+            
+            // Reattach event listeners for delete and reactions
+            attachMessageListeners(newMsg);
+          }
+        });
+        
+        // Update last message ID
+        if (newMessages.length > 0) {
+          lastMessageId = parseInt(newMessages[0].dataset.id);
+        }
+      })
+      .catch(error => console.error('Error fetching messages:', error));
+  }
+
+  // Attach event listeners to message elements
+  function attachMessageListeners(messageElement) {
+    // Attach reaction listeners
+    const reactions = messageElement.querySelectorAll('.reaction-button');
+    reactions.forEach(reaction => {
+      reaction.addEventListener('click', function() {
+        const reactionType = this.dataset.type;
+        react(this, reactionType);
+      });
+    });
+  }
+
+  // Auto-refresh messages every 3 seconds
+  function startAutoRefresh() {
+    setInterval(() => {
+      if (isAutoRefreshEnabled) {
+        fetchNewMessages();
+      }
+    }, 3000);
+  }
+
+  // React to messages
   function react(element, reactionType) {
     const messageDiv = element.closest('.message');
     const messageId = messageDiv.dataset.id;
@@ -126,7 +307,19 @@
       }
     }).then(response => response.json()).then(data => {
       element.querySelector('small').textContent = data.count;
+      element.classList.toggle('active');
     });
   }
+
+  // Initialize on page load
+  document.addEventListener('DOMContentLoaded', function() {
+    initializeLastMessageId();
+    startAutoRefresh();
+    
+    // Attach listeners to existing messages
+    document.querySelectorAll('.message').forEach(msg => {
+      attachMessageListeners(msg);
+    });
+  });
 </script>
 {% endblock %}

@@ -12,4 +12,12 @@ urlpatterns = [
     path('signup/', views.signup, name='signup'),
     path('login/', views.login_view, name='login'),
     path('logout/', auth_views.LogoutView.as_view(next_page='message_list'), name='logout'),
+    path('profile/<str:username>/', views.profile, name='profile'),
+    
+    # Task URLs
+    path('tasks/', views.task_list, name='task_list'),
+    path('tasks/add/', views.add_task, name='add_task'),
+    path('tasks/<int:task_id>/edit/', views.edit_task, name='edit_task'),
+    path('tasks/<int:task_id>/delete/', views.delete_task, name='delete_task'),
+    path('tasks/<int:task_id>/update-status/', views.update_task_status, name='update_task_status'),
 ]
