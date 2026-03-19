@@ -1,0 +1,178 @@
+/* Theme.css - Shared styles for light/dark mode */
+
+/* CSS Variables for theming */
+:root {
+  /* Light mode (default) */
+  --bg-primary: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+  --bg-secondary: rgba(255, 255, 255, 0.95);
+  --text-primary: #212529;
+  --text-secondary: #6c757d;
+  --border-color: #e0e0e0;
+  --shadow-light: 0 8px 32px rgba(0, 0, 0, 0.1);
+  --shadow-hover: 0 16px 48px rgba(0, 0, 0, 0.15);
+  --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  --danger-gradient: linear-gradient(135deg, #f5576c 0%, #e73c7e 100%);
+}
+
+[data-theme="dark"] {
+  /* Dark mode overrides */
+  --bg-primary: linear-gradient(-45deg, #0f0f1e, #1a1a2e, #16213e, #0f3460);
+  --bg-secondary: rgba(30, 30, 50, 0.95);
+  --text-primary: #f8f9fa;
+  --text-secondary: #adb5bd;
+  --border-color: #444;
+  --shadow-light: 0 8px 32px rgba(0, 0, 0, 0.4);
+  --shadow-hover: 0 16px 48px rgba(0, 0, 0, 0.5);
+}
+
+/* Base application styles */
+* {
+  font-family: 'Inter', sans-serif;
+}
+
+body {
+  background: var(--bg-primary);
+  background-size: 400% 400%;
+  min-height: 100vh;
+  padding-top: 20px;
+  padding-bottom: 20px;
+  animation: gradient-shift 15s ease infinite;
+  color: var(--text-primary);
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Navbar */
+.navbar {
+  background: var(--bg-secondary) !important;
+  backdrop-filter: blur(10px);
+  box-shadow: var(--shadow-light);
+  border-radius: 15px;
+  margin: 0 20px 30px 20px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--text-primary);
+}
+
+.navbar-brand {
+  font-size: 1.5rem;
+  font-weight: 700;
+  background: var(--primary-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.nav-link {
+  color: var(--text-primary) !important;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  margin: 0 5px;
+  border-radius: 8px;
+}
+
+.nav-link:hover {
+  background-color: rgba(102, 126, 234, 0.1);
+  color: #667eea !important;
+  transform: translateY(-2px);
+}
+
+/* Cards */
+.card {
+  background: var(--bg-secondary);
+  border: none;
+  border-radius: 15px;
+  box-shadow: var(--shadow-light);
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--text-primary);
+}
+
+.card:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--shadow-hover);
+}
+
+/* Forms */
+textarea, input[type="text"], input[type="email"], input[type="password"], select {
+  border: 2px solid var(--border-color) !important;
+  border-radius: 10px !important;
+  padding: 0.75rem !important;
+  transition: all 0.3s ease !important;
+  font-size: 1rem !important;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+textarea:focus, input:focus, select:focus {
+  border-color: #667eea !important;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
+}
+
+/* Buttons */
+.btn-primary {
+  background: var(--primary-gradient);
+  color: white;
+  border: none;
+}
+
+.btn-primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+  color: white;
+}
+
+/* Reactions */
+.reaction-button, .reaction-badge {
+  transition: all 0.2s ease;
+}
+
+.reaction-button:hover {
+  transform: scale(1.4) rotate(15deg);
+  background-color: rgba(102, 126, 234, 0.1);
+}
+
+/* Dark mode toggle button */
+.theme-toggle {
+  background: none;
+  border: 2px solid var(--border-color);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.theme-toggle:hover {
+  border-color: #667eea;
+  transform: scale(1.1);
+}
+
+/* Loading spinner */
+.loading {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255,255,255,.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .navbar { margin: 0 10px 20px 10px; }
+}

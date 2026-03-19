@@ -1,72 +1,19 @@
-<<<<<<< HEAD
-# TODO: Add Unique Username Validation
+# UI/UX Improvement Plan for Message Board App
 
-## Task
-Prevent users from registering with duplicate usernames by adding explicit form-level validation.
+## Approved Plan Summary
+Enhance Bootstrap usage, add dark mode, infinite scroll, modals, PWA, accessibility across templates.
 
-## Plan:
-- [x] Read and understand the current project structure
-- [ ] Update SignUpForm in messaging/forms.py to add explicit unique username validation
+## Steps to Complete (Mark [x] when done):
 
-## Implementation Steps:
-1. Add a custom `clean_username` method to `SignUpForm` that checks if the username already exists
-2. Provide a user-friendly error message if the username is taken
+- [ ] Step 1: Create TODO.md (current)
+- [ ] Step 2: Read secondary templates (profile.html, login.html, signup.html, add_task.html, edit_task.html)
+- [ ] Step 3: Create messaging/static/css/theme.css for shared styles (dark mode CSS vars, etc.)
+- [ ] Step 4: Update base.html - Add dark mode toggle, tooltips JS, PWA meta, modal templates
+- [ ] Step 5: Update message_list.html - Infinite scroll, delete modal, notifications/toasts, reply accordion
+- [ ] Step 6: Update task_list.html - Completion modal, sortable drag-drop (if feasible)
+- [ ] Step 7: Update other forms/templates for consistency (add_message.html, profile.html, etc.)
+- [ ] Step 8: Add PWA manifest.json and service-worker.js
+- [ ] Step 9: Test locally (runserver, Lighthouse audit)
+- [ ] Step 10: Final cleanup, attempt_completion
 
-## Files to Edit:
-- messaging/forms.py
-=======
-# TODO: Enhance Message Board to Final Project
-
-## 1. UI/UX Improvements
-- [x] Add Bootstrap CDN to base.html
-- [x] Update base.html with Bootstrap navbar and layout
-- [x] Update message_list.html with Bootstrap cards, forms, and responsive design
-- [x] Add icons (e.g., Font Awesome) for reactions and buttons
-- [x] Improve mobile responsiveness
-
-## 2. Pagination
-- [x] Update message_list view to use Django's Paginator
-- [x] Add pagination controls to message_list.html template
-- [ ] Test pagination with multiple pages
-
-## 3. Search Functionality
-- [x] Add search form to message_list.html
-- [x] Update message_list view to filter messages based on search query
-- [x] Support searching by message text and author username
-
-## 4. User Profiles
-- [x] Create profile view in views.py
-- [x] Create profile.html template
-- [x] Add profile link to navbar
-- [x] Display user's messages and stats on profile page
-
-## 5. Additional Reactions
-- [x] Add more reaction types to models.py (e.g., thumbs_up, angry)
-- [x] Update views.py react function for new reactions
-- [x] Update templates to include new reaction buttons
-
-## 6. Notifications
-- [x] Use Django messages for success/error notifications
-- [x] Add notifications for message posting, reactions, etc.
-
-## 7. Error Handling
-- [x] Improve form validation in forms.py
-- [x] Add better error messages in templates
-- [x] Handle AJAX errors in JavaScript
-
-## 8. Testing
-- [ ] Add unit tests for models in tests.py (skipped - user requested to skip testing)
-- [ ] Add tests for views (skipped - user requested to skip testing)
-- [ ] Test forms and authentication (skipped - user requested to skip testing)
-
-## 9. Documentation
-- [x] Update README.md with full feature list
-- [x] Add setup instructions
-- [x] Include screenshots and usage examples
-
-## 10. Security/Performance
-- [x] Ensure all views have proper authentication decorators
-- [x] Optimize database queries (pagination implemented)
-- [x] Add CSRF protection (verified in place)
-- [ ] Consider adding rate limiting if needed (optional future enhancement)
->>>>>>> b05a010e226100904712dde554bf9a50b9a64667
+**Current Progress**: Steps 3-4 complete (theme, base.html dark mode/PWA/modal). Step 5: message_list updates (modal/tooltips). Step 8 partial (manifest).
